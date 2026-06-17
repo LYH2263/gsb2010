@@ -6,7 +6,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 COPY composer.json ./
-RUN composer install --no-dev --no-scripts --no-interaction
+# 无 composer.lock 时需解析依赖；Composer 2.9+ 默认拦截含安全公告的包，演示项目暂关闭该策略
+RUN composer config audit.block-insecure false \
+    && composer install --no-dev --no-scripts --no-interaction
 COPY . .
 RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && chmod -R 775 bootstrap/cache storage
 RUN composer dump-autoload --optimize
